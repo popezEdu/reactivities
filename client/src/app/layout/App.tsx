@@ -9,6 +9,7 @@ function App() {
   const [selectedActivity, setSelectedActivity] = useState<
     IActivity | undefined
   >(undefined);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     // fetch("https://localhost:5001/api/activities")
@@ -34,17 +35,55 @@ function App() {
     setSelectedActivity(undefined);
   };
 
+  const handleOpenForm = (id?: string) => {
+    console.log(id);
+    if (id) {
+      handleSelectActivity(id);
+    } else {
+      handleCancelSelectActivity();
+    }
+    setEditMode(true);
+  };
+
+  const handleFormClose = () => {
+    setEditMode(false);
+  };
+
+  const handleSubmitForm = (activity: IActivity) => {
+    if (activity.id) {
+      setActivities([
+        ...activities.filter((a) => a.id !== activity.id),
+        activity,
+      ]);
+    } else {
+      activity.id = crypto.randomUUID();
+      setActivities([...activities, activity]);
+    }
+    setSelectedActivity(activity);
+    setEditMode(false);
+  };
+
+  const handleDelete = (id: string) => {
+    setActivities(activities.filter((activity) => activity.id !== id));
+    setSelectedActivity(undefined);
+  };
+
   return (
     <Box sx={{ bgcolor: "#eeeeee" }}>
       {/* Este componente elimina el margin CssBaseLine */}
       <CssBaseline />
-      <NavBar />
+      <NavBar openForm={handleOpenForm} />
       <Container maxWidth="xl" sx={{ marginTop: 1 }}>
         <ActivityDashboard
           activities={activities}
           selectActivity={handleSelectActivity}
           cancelSelectActivity={handleCancelSelectActivity}
           selectedActivity={selectedActivity}
+          editMode={editMode}
+          openForm={handleOpenForm}
+          closeForm={handleFormClose}
+          submitForm={handleSubmitForm}
+          deleteActivity={handleDelete}
         />
       </Container>
     </Box>
