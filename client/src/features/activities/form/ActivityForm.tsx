@@ -1,14 +1,14 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
-import type { FormEvent } from "react";
+import { act, type FormEvent } from "react";
 import { useActivities } from "../../../lib/hooks/useActivities";
+import { useNavigate, useParams } from "react-router";
 
-type props = {
-  activity?: IActivity;
-  closeForm: () => void;
-};
-
-export default function ActivityForm({ activity, closeForm }: props) {
-  const { updateActivity, createActivity } = useActivities();
+export default function ActivityForm() {
+  const { id } = useParams<{ id: string }>();
+  const { updateActivity, createActivity, activity, isLoadingActivity } =
+    useActivities(id);
+  const navigate = useNavigate();
+  // Replace with actual activity data if available
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -23,17 +23,22 @@ export default function ActivityForm({ activity, closeForm }: props) {
     if (activity) {
       data.id = activity.id;
       await updateActivity.mutateAsync(data as unknown as IActivity);
-      closeForm();
+      navigate(`/activities/${activity.id}`);
     } else {
-      await createActivity.mutateAsync(data as unknown as IActivity);
-      closeForm();
+      createActivity.mutate(data as unknown as IActivity, {
+        onSuccess: (id) => {
+          navigate(`/activities/${id}`);
+        },
+      });
     }
   };
+
+  if (isLoadingActivity) return <Typography>Loading...</Typography>;
 
   return (
     <Paper sx={{ borderadius: 3, padding: 3 }}>
       <Typography variant="h5" gutterBottom color="primary">
-        Crear Actividad
+        {activity ? "Editar Activity" : "Crear Activity"}
       </Typography>
       <Box
         component="form"
@@ -68,9 +73,7 @@ export default function ActivityForm({ activity, closeForm }: props) {
         <TextField name="city" label="City" defaultValue={activity?.city} />
         <TextField name="venue" label="Venue" defaultValue={activity?.venue} />
         <Box display="flex" justifyContent="end">
-          <Button color="inherit" onClick={closeForm}>
-            Cancel
-          </Button>
+          <Button color="inherit">Cancel</Button>
           <Button
             color="success"
             variant="contained"

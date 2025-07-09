@@ -1,59 +1,20 @@
-import { Box, Container, CssBaseline, Typography } from "@mui/material";
-import { useState } from "react";
+import { Box, Container, CssBaseline } from "@mui/material";
 import NavBar from "./NavBar";
-import ActivityDashboard from "../../features/activities/dashboard/ActivityDashboard";
-import { useActivities } from "../../lib/hooks/useActivities";
+
+import { Outlet } from "react-router";
 
 function App() {
-  const [selectedActivity, setSelectedActivity] = useState<
-    IActivity | undefined
-  >(undefined);
-  const [editMode, setEditMode] = useState(false);
-  const { activities, isPending } = useActivities();
-
   // Al implementar react-query, no es necesario el useEffect para obtener los datos
   // Por lo que el useEffect será removido junto con el estado de activities
-
-  const handleSelectActivity = (id: string) => {
-    setSelectedActivity(activities!.find((activity) => activity.id === id));
-  };
-
-  const handleCancelSelectActivity = () => {
-    setSelectedActivity(undefined);
-  };
-
-  const handleOpenForm = (id?: string) => {
-    if (id) {
-      handleSelectActivity(id);
-    } else {
-      handleCancelSelectActivity();
-    }
-    setEditMode(true);
-  };
-
-  const handleFormClose = () => {
-    setEditMode(false);
-  };
 
   return (
     <Box sx={{ bgcolor: "#eeeeee", minHeight: "100vh" }}>
       {/* Este componente elimina el margin CssBaseLine */}
       <CssBaseline />
-      <NavBar openForm={handleOpenForm} />
+      <NavBar />
       <Container maxWidth="xl" sx={{ marginTop: 1 }}>
-        {!activities && isPending ? (
-          <Typography>Loading...</Typography>
-        ) : (
-          <ActivityDashboard
-            activities={activities}
-            selectActivity={handleSelectActivity}
-            cancelSelectActivity={handleCancelSelectActivity}
-            selectedActivity={selectedActivity}
-            editMode={editMode}
-            openForm={handleOpenForm}
-            closeForm={handleFormClose}
-          />
-        )}
+        {/* El componente <Outlet /> en React Router es un espacio reservado (placeholder) dentro de un componente padre donde se renderizan las rutas hijas anidadas. */}
+        <Outlet />
       </Container>
     </Box>
   );
