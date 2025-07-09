@@ -1,24 +1,18 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import type { FormEvent } from "react";
+import { useActivities } from "../../../lib/hooks/useActivities";
 
 type props = {
   activity?: IActivity;
-  closeForm?: () => void;
-  submitForm?: (activity: IActivity) => void;
+  closeForm: () => void;
 };
 
-export default function ActivityForm({
-  activity,
-  closeForm,
-  submitForm,
-}: props) {
-  // let date = new Date(activity?.date || "");
-  // const format = "yyyy-MM-dd";
-  // const locale = "en-US";
-  // const
+export default function ActivityForm({ activity, closeForm }: props) {
+  const { updateActivity, createActivity } = useActivities();
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     const formData = new FormData(event.currentTarget);
 
     const data: { [Key: string]: FormDataEntryValue } = {};
@@ -26,9 +20,14 @@ export default function ActivityForm({
       data[key] = value;
     });
 
-    if (activity) data.id = activity.id;
-
-    submitForm(data as unknown as IActivity);
+    if (activity) {
+      data.id = activity.id;
+      await updateActivity.mutateAsync(data as unknown as IActivity);
+      closeForm();
+    } else {
+      await createActivity.mutateAsync(data as unknown as IActivity);
+      closeForm();
+    }
   };
 
   return (
@@ -60,7 +59,11 @@ export default function ActivityForm({
           name="date"
           label="Date"
           type="date"
-          defaultValue={activity?.date}
+          defaultValue={
+            activity?.date
+              ? new Date(activity.date).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0]
+          }
         />
         <TextField name="city" label="City" defaultValue={activity?.city} />
         <TextField name="venue" label="Venue" defaultValue={activity?.venue} />
@@ -68,7 +71,12 @@ export default function ActivityForm({
           <Button color="inherit" onClick={closeForm}>
             Cancel
           </Button>
-          <Button color="success" variant="contained" type="submit">
+          <Button
+            color="success"
+            variant="contained"
+            type="submit"
+            disabled={updateActivity.isPending || createActivity.isPending}
+          >
             Submit
           </Button>
         </Box>
