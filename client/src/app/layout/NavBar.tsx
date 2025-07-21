@@ -36,6 +36,7 @@ export default function NavBar() {
             <Box sx={{ display: "flex", gap: 1 }}>
               <MenuItemLink to="/activities">Actividades</MenuItemLink>
               <MenuItemLink to="/createActivity">Crear Actividad</MenuItemLink>
+              <MenuItemLink to="/counter">Contar</MenuItemLink>
             </Box>
             <MenuItem>Menú del Usuario</MenuItem>
           </Toolbar>
