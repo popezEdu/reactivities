@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using reactivities.Application.Core;
 using reactivities.Persistence;
 using AutoMapper;
+using FluentValidation;
+using reactivities.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,9 +31,15 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssemblyContaining<reactivities.Application.Activities.Queries.GetActivityList.Handler>());
+{
+    cfg.RegisterServicesFromAssemblyContaining<reactivities.Application.Activities.Queries.GetActivityList.Handler>();
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+builder.Services.AddValidatorsFromAssemblyContaining<reactivities.Application.Activities.Validators.CreateActivityValidator>();
+
+builder.Services.AddTransient<ExceptionMiddleware>();
 
 var app = builder.Build();
 
@@ -40,6 +48,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseCors();

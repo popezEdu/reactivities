@@ -2,6 +2,7 @@ using System;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using reactivities.Application.Activities.DTOs;
 using reactivities.Domain;
 using reactivities.Persistence;
 
@@ -45,7 +46,7 @@ public class ActivitiesController : BaseApiController
     }
 
     [HttpPost]
-    public async Task<ActionResult<Guid>> CreateActivity(reactivities.Domain.Activity activity)
+    public async Task<ActionResult<Guid>> CreateActivity(CreateActivityDto activityDto)
     {
         // _context.Activities.Add(activity);
         // await _context.SaveChangesAsync();
@@ -53,7 +54,7 @@ public class ActivitiesController : BaseApiController
 
         // Using MediatR to handle the command for creating a new activity
         return await Mediator.Send(
-            new reactivities.Application.Activities.Commands.CreateActivity.Command { Activity = activity }
+            new reactivities.Application.Activities.Commands.CreateActivity.Command { ActivityDto = activityDto }
         );
     }
 

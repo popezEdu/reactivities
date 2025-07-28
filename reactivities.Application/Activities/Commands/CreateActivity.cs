@@ -1,5 +1,8 @@
 using System;
+using AutoMapper;
+using FluentValidation;
 using MediatR;
+using reactivities.Application.Activities.DTOs;
 using reactivities.Domain;
 using reactivities.Persistence;
 
@@ -11,23 +14,26 @@ public class CreateActivity
     // Retorna el Id de la actividad creada.
     public class Command : IRequest<Guid>
     {
-        public required Activity Activity { get; set; }
+        public required CreateActivityDto ActivityDto { get; set; }
     }
 
     public class Handler : IRequestHandler<Command, Guid>
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public Handler(AppDbContext context)
+        public Handler(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         public async Task<Guid> Handle(Command request, CancellationToken cancellationToken)
         {
-            _context.Activities.Add(request.Activity);
+            var activity = _mapper.Map<Activity>(request.ActivityDto);
+            _context.Activities.Add(activity);
             await _context.SaveChangesAsync(cancellationToken);
-            return request.Activity.Id;
+            return activity.Id;
         }
     }
 }
