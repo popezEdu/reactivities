@@ -2,6 +2,8 @@ using System;
 using System.Reflection.Metadata.Ecma335;
 using AutoMapper;
 using MediatR;
+using reactivities.Application.Activities.DTOs;
+using reactivities.Application.Core;
 using reactivities.Domain;
 using reactivities.Persistence;
 
@@ -9,12 +11,12 @@ namespace reactivities.Application.Activities.Commands;
 
 public class EditActivity
 {
-    public class Command : IRequest
+    public class Command : IRequest<Result<Unit>>
     {
-        public required Activity Activity { get; set; }
+        public required EditActivityDto ActivityDto { get; set; }
     }
 
-    public class Handler : IRequestHandler<Command>
+    public class Handler : IRequestHandler<Command, Result<Unit>>
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
@@ -25,21 +27,23 @@ public class EditActivity
             _mapper = mapper;
         }
 
-        public async Task Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
             var activity = await _context.Activities
-                .FindAsync([request.Activity.Id], cancellationToken) ?? throw new Exception("Activity not found");
+                .FindAsync([request.ActivityDto.Id], cancellationToken);
+
+            if (activity == null) return Result<Unit>.Failure("Activity not found", 404);
+
 
             // Map the properties from the request to the existing activity
             // Primer Parameter is the source (request.Activity), second parameter is the destination (activity).
-            _mapper.Map(request.Activity, activity);
+            _mapper.Map(request.ActivityDto, activity);
 
-            // activity.Title = request.Activity.Title;
-            // activity.Description = request.Activity.Description;
-            // activity.Date = request.Activity.Date;
-            // activity.Category = request.Activity.Category;
+            var result = await _context.SaveChangesAsync(cancellationToken) > 0;
 
-            await _context.SaveChangesAsync(cancellationToken);
+            if (!result) return Result<Unit>.Failure("Hubo un problema al editar la actividad.");
+
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

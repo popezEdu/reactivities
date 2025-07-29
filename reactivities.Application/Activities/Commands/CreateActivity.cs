@@ -3,6 +3,7 @@ using AutoMapper;
 using FluentValidation;
 using MediatR;
 using reactivities.Application.Activities.DTOs;
+using reactivities.Application.Core;
 using reactivities.Domain;
 using reactivities.Persistence;
 
@@ -12,12 +13,12 @@ public class CreateActivity
 {
     // Command class to represent the request for creating a new activity.
     // Retorna el Id de la actividad creada.
-    public class Command : IRequest<Guid>
+    public class Command : IRequest<Result<Guid>>
     {
         public required CreateActivityDto ActivityDto { get; set; }
     }
 
-    public class Handler : IRequestHandler<Command, Guid>
+    public class Handler : IRequestHandler<Command, Result<Guid>>
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
@@ -28,12 +29,15 @@ public class CreateActivity
             _mapper = mapper;
         }
 
-        public async Task<Guid> Handle(Command request, CancellationToken cancellationToken)
+        public async Task<Result<Guid>> Handle(Command request, CancellationToken cancellationToken)
         {
             var activity = _mapper.Map<Activity>(request.ActivityDto);
             _context.Activities.Add(activity);
-            await _context.SaveChangesAsync(cancellationToken);
-            return activity.Id;
+            var result = await _context.SaveChangesAsync(cancellationToken) > 0;
+
+            if (!result) return Result<Guid>.Failure("Hubo un problema al crear la actividad.");
+
+            return Result<Guid>.Success(activity.Id);
         }
     }
 }

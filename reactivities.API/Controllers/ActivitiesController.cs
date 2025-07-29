@@ -1,4 +1,5 @@
 using System;
+using System.Reflection.Metadata.Ecma335;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,18 +32,8 @@ public class ActivitiesController : BaseApiController
     [HttpGet("{id}")]
     public async Task<ActionResult<Activity>> GetActivity(Guid id)
     {
-        // var activity = await _context.Activities.FindAsync(id);
-        // if (activity == null)
-        // {
-        //     return NotFound();
-        // }
-        // return Ok(activity);
-
-        // return await _mediator.Send(
-        //     new reactivities.Application.Activities.Queries.GetActivityDetails.Query { Id = id });
-
-        return await Mediator.Send(
-            new reactivities.Application.Activities.Queries.GetActivityDetails.Query { Id = id });
+        return HandleResult(await Mediator.Send(
+            new reactivities.Application.Activities.Queries.GetActivityDetails.Query { Id = id }));
     }
 
     [HttpPost]
@@ -53,36 +44,40 @@ public class ActivitiesController : BaseApiController
         // return CreatedAtAction(nameof(GetActivity), new { id = activity.Id }, activity);
 
         // Using MediatR to handle the command for creating a new activity
-        return await Mediator.Send(
-            new reactivities.Application.Activities.Commands.CreateActivity.Command { ActivityDto = activityDto }
+        return HandleResult(await Mediator.Send(
+            new reactivities.Application.Activities.Commands.CreateActivity.Command { ActivityDto = activityDto })
         );
     }
 
     [HttpPut]
-    public async Task<ActionResult> EditActivity(reactivities.Domain.Activity activity)
+    public async Task<ActionResult> EditActivity(EditActivityDto activity)
     {
         // Using MediatR to handle the command for editing an existing activity
-        await Mediator.Send(new reactivities.Application.Activities.Commands.EditActivity.Command { Activity = activity });
+        return HandleResult(await Mediator.Send(new reactivities.Application.Activities.Commands.EditActivity.Command { ActivityDto = activity }));
 
-        // Devuelve este valor: 204No Content
-        return NoContent();
+        // Antes
+        // Devuelve este valor: 204 No Content
+        // El código de estado HTTP 204, "Sin contenido", se utiliza en API RESTful cuando una solicitud ha sido procesada exitosamente por el servidor, pero no hay contenido que devolver en el cuerpo de la respuesta
+        // return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteActivity(Guid id)
     {
-        try
-        {
-            // Using MediatR to handle the command for deleting an activity
-            await Mediator.Send(new reactivities.Application.Activities.Commands.DeleteActivity.Command { Id = id });
+        return HandleResult(await Mediator.Send(new reactivities.Application.Activities.Commands.DeleteActivity.Command { Id = id }));
 
-            // Devuelve este valor: 204No Content
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        // try
+        // {
+        //     // Using MediatR to handle the command for deleting an activity
+        //     await Mediator.Send(new reactivities.Application.Activities.Commands.DeleteActivity.Command { Id = id });
+
+        //     // Devuelve este valor: 204No Content
+        //     return Ok();
+        // }
+        // catch (Exception ex)
+        // {
+        //     return BadRequest(ex.Message);
+        // }
 
     }
 }

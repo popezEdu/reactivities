@@ -12,6 +12,7 @@ public class MappingProfiles : Profile
         // Define the mapping between Activity and ActivityDto
         CreateMap<Activity, Activity>();
         CreateMap<CreateActivityDto, Activity>();
+        CreateMap<EditActivityDto, Activity>();
     }
 
 }
