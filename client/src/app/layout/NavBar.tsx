@@ -43,6 +43,7 @@ export default function NavBar() {
               <MenuItemLink to="/activities">Actividades</MenuItemLink>
               <MenuItemLink to="/createActivity">Crear Actividad</MenuItemLink>
               <MenuItemLink to="/counter">Contar</MenuItemLink>
+              <MenuItemLink to="/errors">Errores</MenuItemLink>
             </Box>
             <MenuItem>Menú del Usuario</MenuItem>
           </Toolbar>
