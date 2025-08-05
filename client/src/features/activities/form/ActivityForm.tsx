@@ -1,36 +1,38 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
-import { act, type FormEvent } from "react";
+
 import { useActivities } from "../../../lib/hooks/useActivities";
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
+import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import {
+  activitySchema,
+  type ActivitySchema,
+} from "../../../lib/schemas/activityschema";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function ActivityForm() {
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ActivitySchema>({
+    mode: "onTouched",
+    resolver: zodResolver(activitySchema),
+  });
   const { id } = useParams<{ id: string }>();
   const { updateActivity, createActivity, activity, isLoadingActivity } =
     useActivities(id);
-  const navigate = useNavigate();
+
   // Replace with actual activity data if available
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  useEffect(() => {
+    if (activity) reset(activity);
+  }, [activity, reset]);
 
-    const formData = new FormData(event.currentTarget);
-
-    const data: { [Key: string]: FormDataEntryValue } = {};
-    formData.forEach((value, key) => {
-      data[key] = value;
-    });
-
-    if (activity) {
-      data.id = activity.id;
-      await updateActivity.mutateAsync(data as unknown as IActivity);
-      navigate(`/activities/${activity.id}`);
-    } else {
-      createActivity.mutate(data as unknown as IActivity, {
-        onSuccess: (id) => {
-          navigate(`/activities/${id}`);
-        },
-      });
-    }
+  const onSubmit = async (data: ActivitySchema) => {
+    console.log(data);
   };
 
   if (isLoadingActivity) return <Typography>Loading...</Typography>;
@@ -45,22 +47,36 @@ export default function ActivityForm() {
         display="flex"
         flexDirection="column"
         gap={3}
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onSubmit)}
       >
-        <TextField name="title" label="Title" defaultValue={activity?.title} />
         <TextField
+          {...register("title")}
+          name="title"
+          label="Title"
+          defaultValue={activity?.title}
+          error={!!errors.title}
+          helperText={errors.title?.message}
+        />
+        <TextField
+          {...register("description")}
           name="description"
           label="Description"
           multiline
           rows={3}
           defaultValue={activity?.description}
+          error={!!errors.description}
+          helperText={errors.description?.message}
         />
         <TextField
+          {...register("category")}
           name="category"
           label="Category"
           defaultValue={activity?.category}
+          error={!!errors.category}
+          helperText={errors.category?.message}
         />
         <TextField
+          {...register("date")}
           name="date"
           label="Date"
           type="date"
@@ -70,8 +86,22 @@ export default function ActivityForm() {
               : new Date().toISOString().split("T")[0]
           }
         />
-        <TextField name="city" label="City" defaultValue={activity?.city} />
-        <TextField name="venue" label="Venue" defaultValue={activity?.venue} />
+        <TextField
+          {...register("city")}
+          name="city"
+          label="City"
+          defaultValue={activity?.city}
+          error={!!errors.city}
+          helperText={errors.city?.message}
+        />
+        <TextField
+          {...register("venue")}
+          name="venue"
+          label="Venue"
+          defaultValue={activity?.venue}
+          error={!!errors.venue}
+          helperText={errors.venue?.message}
+        />
         <Box display="flex" justifyContent="end">
           <Button color="inherit">Cancel</Button>
           <Button

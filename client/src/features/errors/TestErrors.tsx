@@ -52,11 +52,11 @@ export default function TestErrors() {
         </Button>
       </ButtonGroup>
 
-      {validationErrors.map((err, i) => {
-        <Alert key={i} severity="error">
+      {validationErrors.map((err, i) => (
+        <Alert key={i} severity="error" sx={{ mt: 1 }}>
           {err}
-        </Alert>;
-      })}
+        </Alert>
+      ))}
     </>
   );
 }

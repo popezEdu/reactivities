@@ -7,6 +7,11 @@ export const useActivities = (id? : string) => {
   const queryClient = useQueryClient();
   const location = useLocation();
 
+  // Sobre UseQuery
+  // Los métodos que implementan useQuery en React Query se ejecutan automáticamente cuando el componente que los utiliza se monta o se renderiza inicialmente
+  // o cuando se cumplen las condiciones especificadas en la configuración (como enabled: true y staleTime expirado). 
+  // React Query maneja la obtención de datos, el almacenamiento en caché y la actualización de forma automática.
+
   const { data: activities, isPending } = useQuery({
     queryKey: ["activities"],
     queryFn: async () => {
@@ -15,7 +20,7 @@ export const useActivities = (id? : string) => {
     },
     // Con esto nos aseguramos de no volver a hacer la petición si ya tenemos los datos
     // y de que se mantengan actualizados durante 5 minutos
-    //staleTime: 1000 * 60 * 5, // 5 minutes
+    // staleTime: 1000 * 60 * 5, // 5 minutes
 
     // Only run this query if id is not provided and the path is "/activities"
     enabled: !id && location.pathname === "/activities", 
